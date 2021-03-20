@@ -1,0 +1,233 @@
+<html>
+  <head>
+    <title>Tetris 0.2</title>
+    <style>
+      body {
+        background: #0f0f0f;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 2em;
+        text-align: center;
+      }
+
+      canvas {
+        border: solid 0.2em rgb(146, 70, 70);
+        height: 90vh;
+        background-color: rgb(0, 0, 0);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="score"></div>
+    <canvas id="tetris" width="240" height="500" />
+  </body>
+</html>
+
+<script>
+  const canvas = document.getElementById('tetris');
+  const context = canvas.getContext('2d');
+  // context.scale(1, 1);
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  const blockSize = 40;
+  let horizontalOffset = 0;
+  let verticalOffset = 0;
+  let scena = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ];
+  let scenaCopy = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ];
+  let bottomBorder = (scena.length - 2) * blockSize;
+  canvas.width = scena[0].length * blockSize;
+  canvas.height = scena.length * blockSize;
+
+  let blocks = [
+    [
+      [0, 1, 0],
+      [1, 1, 1],
+      [0, 0, 0],
+    ],
+    [
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [2, 2, 2, 2, 2],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+    ],
+    [
+      [1, 1],
+      [1, 1],
+    ],
+  ];
+
+  let gameOver = false;
+
+  let matrixArr = blocks[0];
+
+  let matrixObj = {
+    matrix: matrixArr,
+    horizontalOffset: 8 * blockSize,
+    verticalOffset: 0,
+    color: '#788',
+  };
+
+  ///draw scene
+
+  let draw = (
+    shapeArr,
+    verticalOffset = 0,
+    horizontalOffset = 0,
+    color = '#83a',
+    collisionChecker = false
+  ) => {
+    for (let y = 0; y < shapeArr.length; y++) {
+      for (let x = 0; x < shapeArr[0].length; x++) {
+        if (shapeArr[y][x] !== 0) {
+          context.fillStyle = color;
+          context.fillRect(
+            x * blockSize + horizontalOffset,
+            y * blockSize + verticalOffset,
+            blockSize,
+            blockSize
+          );
+          if (collisionChecker) {
+            isCollisionUnderBlock(
+              x * blockSize + horizontalOffset,
+              y * blockSize + verticalOffset
+            )
+              ? (() => {
+                  // console.log('collision under block');
+                  return;
+                })()
+              : console.log(); //'no collision under block');
+          }
+        }
+      }
+    }
+  };
+
+  /// under block collision detection
+
+  function isCollisionUnderBlock(xMatrix, yMatrix) {
+    let matrix = matrixObj.matrix;
+    for (i = 1; i < scena.length; i++) {
+      for (j = 0; j < scena[i].length; j++) {
+        if (
+          i <= blockSize &&
+          scena[i][j] !== 0 &&
+          xMatrix === j * blockSize &&
+          yMatrix + blockSize === i * blockSize
+        ) {
+          for (y = 0; y < matrixObj.matrix.length; y++) {
+            for (x = 0; x < matrixObj.matrix[y].length; x++) {
+              if (matrixObj.matrix[y][x] !== 0) {
+                scena[
+                  -1 + i + y - (yMatrix - matrixObj.verticalOffset) / blockSize
+                ][j + x - (xMatrix - matrixObj.horizontalOffset) / blockSize] =
+                  matrixObj.matrix[y][x];
+              }
+            }
+          }
+          matrixObj.horizontalOffset = 8 * blockSize;
+          matrixObj.verticalOffset = 0;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  ///start
+
+  function start() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    draw(scena, 0, 0, '#336');
+    draw(
+      matrixObj.matrix,
+      matrixObj.verticalOffset,
+      matrixObj.horizontalOffset,
+      matrixObj.color,
+      true
+    );
+
+    if (!gameOver) {
+      matrixObj.verticalOffset > bottomBorder //canvas.height - 60
+        ? (matrixObj.verticalOffset = matrixObj.verticalOffset)
+        : (matrixObj.verticalOffset += 1);
+    }
+
+    requestAnimationFrame(start);
+  }
+
+  /// events
+
+  window.addEventListener('keydown', keyDown, false);
+
+  function keyDown(event) {
+    let code = event.keyCode;
+    ///left arrow
+    if (code === 37) {
+      matrixObj.horizontalOffset = matrixObj.horizontalOffset - blockSize;
+    }
+    ///rigt arrow
+    if (code === 39) {
+      matrixObj.horizontalOffset = matrixObj.horizontalOffset + blockSize;
+    }
+  }
+  start();
+</script>
